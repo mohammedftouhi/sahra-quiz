@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مسابقات السهرة — 5 مسابقات سرعة بديهة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#1a1035; --bg2:#0b1e3a;
+    --blue:#3b82f6; --orange:#f97316;
+    --gold:#fbbf24; --text:#fff; --muted:#c7c3e6;
+    --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.15);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:'Dubai','Cairo',system-ui,sans-serif;
+    color:var(--text);
+    background:radial-gradient(circle at 20% 10%,#3b1d6e 0,transparent 45%),
+               radial-gradient(circle at 85% 90%,#0e4d6e 0,transparent 45%),
+               linear-gradient(160deg,var(--bg1),var(--bg2));
+    display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;
+  }
+  button,input{font-family:inherit}
+
+  /* ---------- Header / scores ---------- */
+  header{display:flex;align-items:stretch;gap:2vmin;padding:2vmin 3vmin}
+  .team{flex:1;display:flex;align-items:center;justify-content:space-between;gap:2vmin;
+        border-radius:2.5vmin;padding:1.4vmin 3vmin;border:3px solid transparent}
+  .team.a{background:linear-gradient(135deg,rgba(59,130,246,.35),rgba(59,130,246,.12));border-color:rgba(59,130,246,.6)}
+  .team.b{background:linear-gradient(135deg,rgba(249,115,22,.35),rgba(249,115,22,.12));border-color:rgba(249,115,22,.6)}
+  .team .name{font-weight:900;font-size:clamp(16px,3.4vmin,46px)}
+  .team .score{font-weight:900;font-size:clamp(28px,7vmin,96px);line-height:1;min-width:1.5em;text-align:center}
+  .team .minus{background:rgba(0,0,0,.25);color:#fff;border:2px solid var(--line);border-radius:1.5vmin;
+               font-size:clamp(14px,2.4vmin,30px);padding:.2em .7em;cursor:pointer}
+  .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:16vmin;text-align:center}
+  .mid .prog{font-size:clamp(13px,2.4vmin,30px);color:var(--muted)}
+  .mid .logo{font-size:clamp(22px,5vmin,64px)}
+  .bump{animation:bump .5s}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+
+  /* ---------- Stage ---------- */
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:1vmin 4vmin}
+  .card{width:min(1400px,100%);text-align:center;background:var(--card);border:2px solid var(--line);
+        border-radius:4vmin;padding:4vmin 5vmin;box-shadow:0 2vmin 6vmin rgba(0,0,0,.35);animation:pop .35s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(2vmin) scale(.98)}to{opacity:1;transform:none}}
+  .badge{display:inline-block;font-weight:900;font-size:clamp(15px,3vmin,40px);padding:.25em 1em;border-radius:99px;
+         background:rgba(251,191,36,.18);color:var(--gold);border:2px solid rgba(251,191,36,.5);margin-bottom:2.5vmin}
+  .q{font-weight:900;font-size:clamp(24px,6.2vmin,92px);line-height:1.45;margin:0}
+  .hint{color:var(--muted);font-size:clamp(15px,3vmin,40px);margin-top:2vmin}
+  .answer{margin-top:3vmin;font-weight:900;font-size:clamp(22px,5.5vmin,80px);color:#4ade80;
+          background:rgba(74,222,128,.12);border:2px dashed rgba(74,222,128,.6);border-radius:3vmin;padding:1.5vmin 3vmin;
+          display:none;animation:pop .35s}
+  .answer.show{display:block}
+  .answer small{display:block;font-weight:700;font-size:.5em;color:#bbf7d0;margin-top:.4em}
+
+  /* timer */
+  .timer{margin:3vmin auto 0;width:min(900px,90%);display:none}
+  .timer.show{display:block}
+  .tnum{font-weight:900;font-size:clamp(34px,11vmin,150px);line-height:1}
+  .tbar{height:2.2vmin;min-height:10px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:1.5vmin}
+  .tfill{height:100%;width:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#ef4444);transition:width .25s linear}
+  .timer.end .tnum{color:#ef4444;animation:shake .4s 2}
+  @keyframes shake{25%{transform:translateX(-1vmin)}75%{transform:translateX(1vmin)}}
+
+  /* flash words (math / opposite) */
+  .flash{font-weight:900;font-size:clamp(60px,22vmin,300px);line-height:1.1;min-height:1.2em;margin:1vmin 0}
+  .flash.go{animation:flashIn .3s ease}
+  @keyframes flashIn{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+  /* stroop */
+  .stroop{display:none;grid-template-columns:repeat(4,1fr);gap:2vmin 3vmin;margin-top:2vmin}
+  .stroop.show{display:grid}
+  .stroop span{font-weight:900;font-size:clamp(28px,7.5vmin,110px);line-height:1.25}
+
+  .helpers{display:none;flex-wrap:wrap;justify-content:center;gap:1.2vmin;margin-top:2.5vmin}
+  .helpers.show{display:flex}
+  .helpers span{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:99px;
+                padding:.3em .9em;font-size:clamp(14px,2.8vmin,36px)}
+
+  /* ---------- Controls ---------- */
+  nav.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:1.6vmin;padding:2vmin 3vmin 3vmin}
+  .btn{border:3px solid transparent;border-radius:2vmin;padding:.55em 1.2em;cursor:pointer;
+       font-weight:900;font-size:clamp(15px,3.2vmin,42px);color:#fff;background:rgba(255,255,255,.12);
+       transition:transform .12s, box-shadow .12s, background .12s}
+  .btn.primary{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+  .btn.green{background:linear-gradient(135deg,#22c55e,#15803d)}
+  .btn.ta{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+  .btn.tb{background:linear-gradient(135deg,#f97316,#c2410c)}
+  .btn[hidden]{display:none}
+  .btn:focus,.minus:focus,input:focus{outline:none;border-color:#fff;box-shadow:0 0 0 .6vmin var(--gold),0 0 4vmin rgba(251,191,36,.7);transform:scale(1.08)}
+  .btn:active{transform:scale(.97)}
+
+  /* ---------- Setup / end ---------- */
+  .setup h1{font-size:clamp(30px,8vmin,110px);margin:0 0 1vmin;font-weight:900}
+  .setup p{color:var(--muted);font-size:clamp(15px,3vmin,40px);margin:0 0 3vmin}
+  .names{display:flex;gap:3vmin;justify-content:center;flex-wrap:wrap;margin-bottom:3vmin}
+  .names label{display:flex;flex-direction:column;gap:1vmin;font-weight:700;font-size:clamp(14px,2.8vmin,36px)}
+  .names input{font-size:clamp(18px,4vmin,52px);font-weight:900;text-align:center;border-radius:2vmin;padding:.3em .6em;
+               border:3px solid var(--line);background:rgba(0,0,0,.3);color:#fff;width:min(40vw,520px)}
+  .names .ia{border-color:var(--blue)} .names .ib{border-color:var(--orange)}
+  .tips{color:var(--muted);font-size:clamp(13px,2.4vmin,30px);margin-top:3vmin;line-height:1.8}
+  .crown{font-size:clamp(60px,20vmin,260px);line-height:1;animation:float 2s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-2vmin)}}
+  .confetti{position:fixed;top:-10vh;font-size:5vmin;pointer-events:none;animation:fall linear forwards;z-index:9}
+  @keyframes fall{to{transform:translateY(120vh) rotate(720deg)}}
+
+  @media (max-width:700px){
+    header{flex-wrap:wrap}
+    .mid{order:-1;width:100%;flex-direction:row;gap:12px;min-width:0}
+    .team{padding:10px 14px}
+    .card{padding:22px 16px;border-radius:20px}
+    .stroop,body.hard .stroop{grid-template-columns:repeat(2,1fr)}
+    .names input{width:80vw}
+  }
+
+  /* ---------- additions ---------- */
+  .seq{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1.5vmin;margin:3vmin 0 1vmin}
+  .seq span{font-weight:900;font-size:clamp(26px,7vmin,100px);padding:1vmin 2.5vmin;border-radius:2.5vmin;background:rgba(255,255,255,.1);border:2px solid var(--line)}
+  .seq span.qm{background:linear-gradient(160deg,#fde68a,#f59e0b);color:#3b1d0a}
+  .seq i{font-style:normal;font-size:clamp(20px,5vmin,70px);color:var(--muted)}
+  body.hard{background:radial-gradient(circle at 20% 10%,#6e1d3b 0,transparent 45%),radial-gradient(circle at 85% 90%,#5a1a0e 0,transparent 45%),linear-gradient(160deg,#2a0b1e,#1a0a0a)}
+  body.hard .stroop{grid-template-columns:repeat(6,1fr)}
+  body.hard .stroop span{font-size:clamp(24px,6vmin,90px)}
+  header[hidden],nav[hidden]{display:none!important}
+  .q.small{font-size:clamp(20px,4.6vmin,68px)}
+  .q.big{font-size:clamp(30px,8vmin,120px)}
+  .tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:2vmin;margin:3vmin 0 1vmin;direction:rtl}
+  .tiles span{display:flex;align-items:center;justify-content:center;width:13vmin;height:13vmin;min-width:54px;min-height:54px;
+              font-weight:900;font-size:clamp(28px,8vmin,120px);border-radius:2.5vmin;
+              background:linear-gradient(160deg,#fde68a,#f59e0b);color:#3b1d0a;box-shadow:0 1vmin 0 #b45309}
+  .odd{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5vmin;margin:3vmin 0 1vmin}
+  .odd span{font-weight:900;font-size:clamp(22px,6vmin,90px);padding:2.5vmin 1vmin;border-radius:3vmin;
+            background:rgba(255,255,255,.1);border:2px solid var(--line)}
+  .picker{display:flex;flex-wrap:wrap;justify-content:center;gap:2vmin;margin-bottom:3.5vmin}
+  .pick{display:flex;flex-direction:column;align-items:center;gap:.2em;min-width:17vmin;font-size:clamp(15px,2.8vmin,38px)}
+  .pick .pi{font-size:1.6em}
+  .pick.on{background:linear-gradient(135deg,#fbbf24,#d97706);color:#2a1600}
+  .btn.big{font-size:clamp(20px,5vmin,64px)}
+  .mid .qn{font-size:clamp(12px,2.2vmin,28px);color:var(--gold);font-weight:700}
+  /* 65" landscape TV: use the full width */
+  @media (min-aspect-ratio:16/10){ .card{width:min(1700px,94vw)} }
+  @media (max-width:700px){ .odd{grid-template-columns:repeat(2,1fr)} .tiles span{width:56px;height:56px} .pick{min-width:40vw} }
+</style>
+</head>
+<body>
+
+<header id="hdr" hidden>
+  <div class="team a">
+    <div class="name" id="nameA">الفريق الأزرق</div>
+    <div class="score" id="scoreA">0</div>
+    <button class="minus" data-nav onclick="addPoint(0,-1)" title="إنقاص نقطة" dir="ltr">−1</button>
+  </div>
+  <div class="mid"><div class="logo">⚡</div><div class="qn" id="qname"></div><div class="prog" id="prog" dir="ltr"></div></div>
+  <div class="team b">
+    <div class="name" id="nameB">الفريق البرتقالي</div>
+    <div class="score" id="scoreB">0</div>
+    <button class="minus" data-nav onclick="addPoint(1,-1)" title="إنقاص نقطة" dir="ltr">−1</button>
+  </div>
+</header>
+
+<main id="stage"></main>
+
+<nav class="controls" id="controls" hidden>
+  <button class="btn" data-nav id="bPrev" onclick="go(-1)">→ السابق</button>
+  <button class="btn primary" data-nav id="bStart" onclick="startActivity()">▶ ابدأ</button>
+  <button class="btn green" data-nav id="bReveal" onclick="reveal()">👀 الإجابة</button>
+  <button class="btn ta" data-nav id="bA" onclick="addPoint(0,1)"><bdi dir="ltr">+1</bdi> <span class="nA">الأزرق</span></button>
+  <button class="btn tb" data-nav id="bB" onclick="addPoint(1,1)"><bdi dir="ltr">+1</bdi> <span class="nB">البرتقالي</span></button>
+  <button class="btn" data-nav id="bNext" onclick="go(1)">التالي ←</button>
+</nav>
+
+<script>
+/* ================= بنك الأسئلة (5 مسابقات × 50) ================= */
+const COLORS=[
+  {n:'أحمر',c:'#ff4040'},{n:'أزرق',c:'#3b8bff'},{n:'أخضر',c:'#22d36a'},
+  {n:'أصفر',c:'#ffd60a'},{n:'بنفسجي',c:'#b56cff'},{n:'برتقالي',c:'#ff9a3c'}
+];
+const NOYES_HELP=['اسمك …؟','متأكد؟','يعني نعم؟','تحب الكبسة؟','قلت «لا» قبل شوي؟','أنت جالس الحين؟','زين، خلصنا؟','تبي تكمل؟'];
+
+const TRICK=[
+ ['كم شهر في السنة فيه 28 يوم؟','كلها! 12 شهر 😄','كل الشهور فيها 28 يوم وزيادة'],
+ ['في سباق جري… تجاوزت اللي بالمركز الثاني. وش مركزك الحين؟','الثاني','مو الأول! أخذت مكانه بس'],
+ ['ديك باض فوق السطح… البيضة وين تطيح؟','الديك ما يبيض! 🐓'],
+ ['أبو محمد عنده 4 عيال: سعد، سعيد، مسعود… والرابع وش اسمه؟','محمد!'],
+ ['قل «أبيض» خمس مرات بسرعة… وش تشرب البقرة؟','ماء! 💧','البقرة ما تشرب حليب 😂',1],
+ ['وش الشي اللي كل ما أخذت منه… يكبر؟','الحفرة 🕳️'],
+ ['أيهم أثقل: كيلو حديد ولا كيلو قطن؟','نفس الوزن! كلهم كيلو ⚖️'],
+ ['عندك 3 تفاحات… وأخذت منها 2. كم تفاحة عندك؟','2 🍎','اللي أخذتها هي اللي عندك'],
+ ['كم مرة تقدر تطرح 5 من 25؟','مرة وحدة بس!','بعدها تصير تطرح من 20 مو من 25'],
+ ['ابدأ بـ 30… اقسمها على نص… وزد عليها 10. كم الناتج؟','70','القسمة على نص = الضرب في 2'],
+ ['أم أحمد عندها 5 بنات، وكل بنت عندها أخ واحد. كم عيالها كلهم؟','6','5 بنات + أحمد (أخوهم كلهم واحد)'],
+ ['وش الشي اللي له أسنان… وما يعض؟','المشط 🪮'],
+ ['كلمة إذا نطقتها… انكسرت؟','الصمت 🤫'],
+ ['في سباق… تجاوزت آخر واحد. وش مركزك؟','مستحيل! 😄','ما تقدر تتجاوز الأخير… لأنك أصلاً وراه'],
+ ['يمشي بلا رجول… ويبكي بلا عيون. وش هو؟','السحاب ☁️'],
+ ['له عين وحدة… وما يشوف. وش هو؟','الإبرة 🪡'],
+ ['شي كل ما زاد… نقص. وش هو؟','العمر ⏳'],
+ ['يكتب… وما يقرأ. وش هو؟','القلم ✏️'],
+ ['بيت ما له أبواب ولا شبابيك. وش هو؟','البيضة 🥚'],
+ ['تلقاه في «الليل» 3 مرات… وفي «النهار» مرة وحدة. وش هو؟','حرف اللام «ل»'],
+ ['وش اللي في وسط «مكة»؟','حرف الكاف «ك» 😄'],
+ ['لو سمّينا جناح الدجاجة «رجل»… كم رجل للدجاجة؟','2 🐔','التسمية ما تغيّر الحقيقة!'],
+ ['ولد نط من سلّم فيه 20 درجة… وما تعوّر. كيف؟','نط من أول درجة 😄'],
+ ['وش الشي اللي ترفعه بسهولة… بس ما تقدر ترميه بعيد؟','الريشة 🪶'],
+ ['له رقبة… وما له راس. وش هو؟','القارورة (الغرشة)'],
+ ['أخت خالك… وما هي خالتك. مين هي؟','أمك ❤️'],
+ ['ولد أبوك… وما هو أخوك. مين هو؟','أنت! 😄'],
+ ['وش تحط في الثلاجة… عشان يصير حار؟','الشطة 🌶️'],
+ ['كم حرف في كلمة «كم»؟','2','ك + م'],
+ ['5 قطط يصيدون 5 فيران في 5 دقايق. كم قطة تحتاج عشان تصيد 100 فار في 100 دقيقة؟','5 قطط 🐱','كل قطة تصيد فار كل 5 دقايق'],
+ ['دخلت غرفة مظلمة فيها شمعة وفانوس ودفاية حطب، ومعك عود كبريت واحد. وش تولّع أول؟','عود الكبريت 🔥'],
+ ['وش الشهر اللي الناس تنام فيه أقل شي؟','فبراير 😄','لأنه أقصر شهر'],
+ ['شي يدخل الماء… وما يتبلل. وش هو؟','الظل'],
+ ['رجل يمشي تحت المطر بدون شمسية ولا طاقية… وما تبللت ولا شعرة من راسه. ليش؟','لأنه أصلع 😂'],
+ ['وش الشي اللي تقدر تمسكه بيدك اليسار… ومستحيل تمسكه بيدك اليمين؟','يدك اليمين نفسها! 😄','(أو كوعك اليمين)'],
+ ['ثلاث دكاترة عندهم أخ اسمه علي… بس علي ما عنده ولا أخ. كيف؟','الدكاترة بنات! أخواته 👩‍⚕️'],
+ ['وش أول شي تسويه لما تصحى من النوم؟','تفتح عيونك 👀'],
+ ['راعي غنم عنده 17 خروف… ماتت كلها إلا 9. كم بقى؟','9 🐑'],
+ ['بيت جدرانه الأربعة كلها تطل على الجنوب… مر دب من جنبه. وش لون الدب؟','أبيض 🐻‍❄️','البيت في القطب الشمالي'],
+ ['يمشي ويوقف… وما له رجول. وش هو؟','الساعة ⏰'],
+ ['عنده مفاتيح كثير… وما يفتح ولا باب. وش هو؟','الكيبورد ⌨️','(أو البيانو)'],
+ ['شي كل ما غسّلت فيه… هو يتوسخ. وش هو؟','الماء 💧'],
+ ['فيه مدن بلا بيوت… وأنهار بلا ماء. وش هو؟','الخريطة 🗺️'],
+ ['شي حقك… والناس يستخدمونه أكثر منك. وش هو؟','اسمك 😄'],
+ ['أنت سواق باص: ركب 5 ونزل 2، ركب 3 ونزل 4… كم عمر السواق؟','عمرك أنت! 😄','لأنك أنت السواق'],
+ ['عندك 3 حبات حلاو، تاكل وحدة كل نص ساعة. بعد كم تخلص؟','بعد ساعة وحدة 🍬','الأولى الحين، الثانية بعد نص ساعة، الثالثة بعد ساعة'],
+ ['9 عصافير على شجرة… واحد صفّق بقوة جنبها. كم عصفور بقى؟','ولا واحد! كلهم طاروا 🐦'],
+ ['شي تكسره… بدون ما تلمسه. وش هو؟','الوعد 🤝'],
+ ['يسمع بلا أذن… ويتكلم بلا لسان. وش هو؟','الجوال 📱'],
+ ['شي مليان ثقوب… ومع ذلك يشيل الماء. وش هو؟','الإسفنجة 🧽'],
+ ['يمينك بحر، يسارك جبل، قدامك حصان، ووراك جمل… وش تسوي؟','تنزل من المرجيحة! 🎠'],
+ ['كم بيضة تقدر تاكل وأنت على الريق؟','وحدة بس! 😄','بعدها ما صرت على الريق'],
+ ['مين اللي يتكلم كل لغات العالم؟','الصدى 🗣️'],
+ ['مين ينام… وعيونه مفتوحة؟','السمك 🐟','ما عنده جفون'],
+ ['شي يقرصك… وما تشوفه. وش هو؟','الجوع 😋'],
+];
+
+const MATH=[
+ [['1000','+ 40','+ 1000','+ 30','+ 1000','+ 20','+ 1000','+ 10'],'4100','أغلب الناس يقولون 5000'],
+ [['3','× 3','− 3','÷ 3','+ 3'],'5','3×3=9 → 6 → 2 → 5'],
+ [['500','+ 50','+ 5','+ 500','+ 50','+ 5'],'1110'],
+ [['90','÷ 2','+ 5','× 2','− 1'],'99','45 → 50 → 100 → 99'],
+ [['1000','+ 1000','+ 100','+ 10','+ 1000','+ 100','+ 10'],'3220'],
+ [['7','+ 7','+ 7','+ 7','+ 7','+ 7','+ 7'],'49','7 مرات 7'],
+ [['20','+ 20','− 20','+ 20','− 20','+ 20','− 20','+ 20'],'40'],
+ [['12','+ 12','+ 12','+ 12','+ 12','− 60'],'0 (صفر!) 😄'],
+ [['1000','+ 20','+ 1000','+ 30','+ 1000','+ 10'],'3060'],
+ [['99','+ 1','+ 999','+ 1'],'1100'],
+];
+
+const THREE=['أشياء لونها أصفر','أشياء موجودة في المطبخ','أسماء تبدأ بحرف «ع»','أشياء تطير','فواكه لونها أحمر','دول عربية','حيوانات تعيش في الماء',
+ 'ألوان','أكلات سعودية','مدن سعودية','رياضات','أشياء مدوّرة','أشياء باردة','حيوانات المزرعة',
+ 'أسماء بنات تبدأ بحرف «م»','أسماء أولاد تبدأ بحرف «ف»','أشياء في الشنطة المدرسية','خضار','أشياء تشتغل بالكهرباء','حيوانات لها ذيل','أشياء تشوفها في السماء',
+ 'أشياء تلبسها في رجلك','أشياء طعمها حلو','أشياء تبدأ بحرف «ب»','أشياء لونها أبيض','ماركات سيارات','حشرات','أشياء تنكسر',
+ 'أنواع حلويات','أشياء ريحتها حلوة','أشياء داخل السيارة','أشياء تلقاها على البحر','طيور','أجزاء من الوجه','أشياء تبدأ بحرف «س»'];
+
+const GEN=[
+ ['old','وش يعني «ترند»؟','شي منتشر وكل الناس تتكلم عنه'],
+ ['kids','وش هو «الأتريك»؟','فانوس قديم يشتغل بالقاز للإضاءة 🏮'],
+ ['old','وش هي «روبلوكس»؟','لعبة إلكترونية يبني فيها اللاعبين عوالمهم ويلعبون مع بعض 🎮'],
+ ['kids','وش هي «القِربة»؟','وعاء من الجلد يحفظون فيه الماء ويبرد'],
+ ['old','وش يعني «نوب» عند اللاعبين؟','لاعب مبتدئ ما يعرف يلعب 😅'],
+ ['kids','وش هو «التلفون أبو قرص»؟','تلفون قديم تدوّر القرص بإصبعك رقم رقم عشان تتصل ☎️'],
+ ['old','وش يعني «يوتيوبر»؟','شخص ينشر فيديوهات على يوتيوب ويتابعونه الناس'],
+ ['kids','وش هو «الدافور»؟','موقد صغير يشتغل بالقاز للطبخ 🔥'],
+ ['old','وش يعني «لايك»؟','إعجاب 👍 تضغطه على صورة أو فيديو عاجبك'],
+ ['kids','وش هو «الكاسيت»؟','شريط يسجّلون عليه الصوت والأغاني ويشغّلونه بالمسجّل 📼'],
+ ['old','وش يعني «ستريك» في سناب؟','أيام متتالية تتراسل فيها مع شخص 🔥 ولو وقفت يوم تنقطع'],
+ ['kids','وش هو «السراج»؟','مصباح زيت قديم بفتيلة 🪔'],
+ ['old','وش يعني «فلتر» في الجوال؟','تأثير يغيّر شكل الصورة أو الوجه 🐶'],
+ ['kids','وش هي «المهفّة»؟','مروحة يدوية من الخوص يهفّون فيها على أنفسهم'],
+ ['old','وش هو «الإيموجي»؟','الوجيه والرموز الصغيرة في الرسائل 😂❤️'],
+ ['kids','وش هو «الزنبيل»؟','سلة من الخوص يشيلون فيها الأغراض 🧺'],
+ ['old','وش يعني «هاشتاق»؟','كلمة قبلها # تجمع كل الكلام عن نفس الموضوع'],
+ ['kids','وش هي «الرحى»؟','حجرين فوق بعض يطحنون فيهم الحب والقمح'],
+ ['old','وش هو «الستوري»؟','صورة أو فيديو تنزّله ويختفي بعد 24 ساعة'],
+ ['kids','وش هو «الفيديو أبو شريط»؟','جهاز يشغّل أفلام مسجلة على شريط كبير 📼'],
+ ['old','وش يعني «قيمر»؟','شخص يحب الألعاب الإلكترونية ويلعبها كثير 🎮'],
+ ['kids','وش هو «الأتاري»؟','جهاز ألعاب فيديو قديم قبل البلايستيشن 👾'],
+ ['old','وش يعني «لاق»؟','بطء وتعليق في اللعبة أو النت 🐢'],
+ ['kids','وش هي «السحّارة»؟','صندوق خشبي يحفظون فيه الملابس والأغراض'],
+ ['old','وش يعني «سكن» في الألعاب؟','لبس أو شكل جديد للشخصية في اللعبة 🦸'],
+ ['kids','وش هي «الغرشة»؟','القارورة أو الزجاجة 🍶'],
+ ['old','وش هي «ماينكرافت»؟','لعبة مكعبات تبني فيها بيوت وعوالم ⛏️'],
+ ['kids','وش هو «النجر»؟','هاون نحاس يدقّون فيه القهوة والهيل ☕'],
+ ['old','وش يعني «كرنج»؟','تصرف محرج يخليك تستحي عن صاحبه 😬'],
+ ['kids','وش هي «الشبرية»؟','سرير خشبي قديم منسوج بالحبال 🛏️'],
+];
+
+const ANAGRAM=['سيارة','مدرسة','برتقال','كبسة','تلفزيون','طيارة','ثلاجة','فراشة','زرافة','شوكولاتة','بطيخ','قهوة','نخلة','جوال','كرسي',
+ 'مطبخ','دجاجة','حصان','مفتاح','شمسية','ساعة','كتاب','سمكة','تفاحة','ملعقة','أرنب','صحراء','نظارة','دراجة','مروحة','بسكويت','مكيف','حديقة','غيمة','مستشفى'];
+
+const PROVERB=[
+ ['اللي ما يعرف الصقر…','يشويه 🦅'],['الصديق وقت…','الضيق'],['من جدّ…','وجد'],['القرد في عين أمه…','غزال 🐒'],['اللي فات…','مات'],
+ ['الوقت كالسيف…','إن لم تقطعه قطعك'],['من حفر حفرة لأخيه…','وقع فيها'],['عصفور في اليد…','ولا عشرة على الشجرة 🐦'],['اللي ما له أول…','ما له تالي'],['الجار قبل…','الدار 🏠'],
+ ['درهم وقاية…','خير من قنطار علاج'],['كل تأخيرة…','فيها خيرة'],['من شبّ على شيء…','شاب عليه'],['الطيور على أشكالها…','تقع'],['يا غريب كن…','أديب'],
+ ['ربّ أخ لك…','لم تلده أمك'],['الباب اللي يجيك منه الريح…','سدّه واستريح 🚪'],['لا تأجل عمل اليوم…','إلى الغد'],['إذا كان الكلام من فضة…','فالسكوت من ذهب'],['العلم في الصغر…','كالنقش على الحجر'],
+ ['خير الكلام…','ما قلّ ودلّ'],['على قد لحافك…','مدّ رجولك'],['الحركة…','بركة'],['يد وحدة…','ما تصفّق 👏'],['اللي ما يطول العنب…','يقول عنه حامض 🍇'],
+];
+
+const ODD=[
+ [['تفاح','موز','جزر','عنب'],'جزر 🥕','خضار، والباقي فواكه'],
+ [['أسد','نمر','فهد','بقرة'],'بقرة 🐄','مو حيوان مفترس'],
+ [['أحمر','أزرق','كرسي','أخضر'],'كرسي 🪑','مو لون'],
+ [['الرياض','جدة','القاهرة','الدمام'],'القاهرة','مو مدينة سعودية'],
+ [['قلم','مسطرة','ممحاة','ملعقة'],'ملعقة 🥄','مو من أدوات المدرسة'],
+ [['سمكة','حوت','دلفين','جمل'],'جمل 🐪','ما يعيش في البحر'],
+ [['كورة','بطيخة','برتقالة','كتاب'],'كتاب 📕','مو مدوّر'],
+ [['نسر','صقر','حمامة','بطريق'],'بطريق 🐧','ما يطير'],
+ [['ثلاجة','فرن','مكيف','شجرة'],'شجرة 🌳','ما تشتغل بالكهرباء'],
+ [['2','4','7','8'],'7','رقم فردي والباقي زوجي'],
+ [['السبت','الأحد','رمضان','الثلاثاء'],'رمضان 🌙','شهر مو يوم'],
+ [['كرة قدم','سباحة','تنس','شطرنج'],'شطرنج ♟️','ما فيه حركة جسم'],
+ [['ثوب','شماغ','بشت','صحن'],'صحن 🍽️','مو لبس'],
+ [['3','6','9','10'],'10','مو من جدول 3'],
+ [['فيل','زرافة','فأر','وحيد القرن'],'فأر 🐭','حيوان صغير والباقي ضخمة'],
+ [['حليب','عصير','ماء','خبز'],'خبز 🍞','مو مشروب'],
+ [['عين','أذن','أنف','ركبة'],'ركبة','مو في الوجه'],
+ [['مربع','مثلث','دائرة','تفاحة'],'تفاحة 🍎','مو شكل هندسي'],
+ [['طيارة','سيارة','قطار','بيت'],'بيت 🏠','ما يتحرك'],
+ [['مكة','المدينة','الطائف','دبي'],'دبي','مو في السعودية'],
+ [['صيف','شتاء','ربيع','ليل'],'ليل 🌙','مو فصل من فصول السنة'],
+ [['مطرقة','مفك','منشار','مخدة'],'مخدة','مو من العدة'],
+ [['نحلة','فراشة','ذبابة','عصفور'],'عصفور 🐦','مو حشرة'],
+ [['10','20','30','33'],'33','مو من مضاعفات العشرة'],
+ [['تمر','رطب','بلح','رز'],'رز 🍚','مو من النخلة'],
+ [['ذهب','فضة','حديد','خشب'],'خشب 🪵','مو معدن'],
+ [['الأربعاء','الخميس','الجمعة','يناير'],'يناير','شهر مو يوم'],
+ [['قطة','كلب','أرنب','تمساح'],'تمساح 🐊','مو حيوان أليف'],
+ [['شاي','قهوة','حليب','كبسة'],'كبسة 🍛','مو مشروب'],
+ [['يمين','يسار','فوق','أحمر'],'أحمر','مو اتجاه'],
+];
+
+const SEQ=[];
+const PER={trick:11,math:2,stroop:2,opposite:2,noyes:2,three:7,gen:6,anagram:7,proverb:5,odd:6};
+const CFG={title:'مسابقة السهرة',icon:'🧠⚡',sub:'سرعة بديهة… وشوية لخبطة 😄 — 5 مسابقات، كل وحدة 50 سؤال',theme:'',
+  times:{trick:10,gen:10,three:5,noyes:30,anagram:15,proverb:10,odd:10,seq:15,stroop:15},
+  stroopN:8, mathMs:1500, opp:{n:12,start:2200,min:1000,step:80}, oppFast:{n:18,start:1300,min:650,step:50}};
+
+const LABEL={
+  trick:'سؤال فخ 🪤', three:'3 في 5 ثواني ⏱️', math:'حساب ملخبط 🧮', stroop:'قل اللون مو الكلمة 🎨',
+  noyes:'ممنوع «لا» و«نعم» 🚫', opposite:'سوّ العكس 🔄', genold:'سؤال للجد والجدة 👴👵', genkids:'سؤال للصغار 🧒👧',
+  anagram:'رتّب الحروف 🔤', proverb:'كمّل المثل 📜', odd:'وش الغريب؟ 🤔', seq:'كمّل التسلسل 🔢'
+};
+
+/* ===== بناء 5 مسابقات، كل وحدة 50 سؤال ===== */
+function buildQuiz(k){
+  const sl=(arr,n)=>arr.slice(k*n,k*n+n);
+  const P=PER;
+  const pools={
+    trick:sl(TRICK,P.trick).map(x=>({t:'trick',q:x[0],a:x[1],s:x[2],say:x[3]})),
+    math:sl(MATH,P.math).map(x=>({t:'math',steps:x[0],a:x[1],s:x[2]})),
+    stroop:Array.from({length:P.stroop},()=>({t:'stroop'})),
+    opposite:Array.from({length:P.opposite},(x,i)=>({t:'opposite',fast:i%2===1})),
+    noyes:Array.from({length:P.noyes},()=>({t:'noyes'})),
+    three:sl(THREE,P.three).map(x=>({t:'three',q:'عطني 3 '+x})),
+    gen:sl(GEN,P.gen).map(x=>({t:'gen',who:x[0],q:x[1],a:x[2]})),
+    anagram:sl(ANAGRAM,P.anagram).map(x=>({t:'anagram',w:x})),
+    proverb:sl(PROVERB,P.proverb).map(x=>({t:'proverb',q:x[0],a:x[1]})),
+    odd:sl(ODD,P.odd).map(x=>({t:'odd',items:x[0],a:x[1],s:x[2]})),
+    seq:sl(SEQ,P.seq||0).map(x=>({t:'seq',items:x[0],a:x[1],s:x[2]})),
+  };
+  const OFF={trick:.1,three:.3,anagram:.5,gen:.7,odd:.2,proverb:.6,math:.35,stroop:.55,opposite:.8,noyes:.15,seq:.45};
+  let all=[];
+  for(const t in pools){const n=pools[t].length;pools[t].forEach((it,j)=>all.push({p:(j+OFF[t])/n,it}));}
+  all.sort((a,b)=>a.p-b.p);
+  const out=all.map(x=>x.it);
+  for(let i=1;i<out.length;i++){ if(out[i].t===out[i-1].t){ for(let j=i+1;j<out.length;j++){ if(out[j].t!==out[i].t&&out[j].t!==out[i-1].t&&(j+1>=out.length||out[j+1].t!==out[i].t)&&out[j-1].t!==out[i].t){const tmp=out[i];out[i]=out[j];out[j]=tmp;break;} } } }
+  return out;
+}
+const QUIZZES=[0,1,2,3,4].map(buildQuiz);
+if(CFG.theme) document.body.classList.add(CFG.theme);
+
+/* ================= الحالة ================= */
+let quizNo=0, Q=QUIZZES[0], idx=0, scores=[0,0], names=['الفريق الأزرق','الفريق البرتقالي'];
+let timerId=null, seqId=null;
+const $=id=>document.getElementById(id);
+const ar=n=>String(n);
+const QNAMES=['الأولى','الثانية','الثالثة','الرابعة','الخامسة'];
+const QICONS=['🧠','⚡','🎯','🚀','🏆'];
+
+/* ================= الصوت ================= */
+let actx=null;
+function beep(f=880,d=.15,v=.25){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.frequency.value=f;o.type='sine';g.gain.value=v;o.connect(g);g.connect(actx.destination);
+    o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d);
+  }catch(e){}
+}
+const ding=()=>{beep(660,.12);setTimeout(()=>beep(990,.25),120)};
+const buzz=()=>{beep(220,.5,.35)};
+
+/* ================= شاشة البداية ================= */
+function hashQuiz(){ const m=/^#quiz-([1-5])$/.exec(location.hash||''); return m?(+m[1]-1):null; }
+function showSetup(){
+  stopAll();
+  const hq=hashQuiz(); if(hq!==null) quizNo=hq;
+  $('hdr').hidden=true;$('controls').hidden=true;
+  $('stage').innerHTML=`
+  <div class="card setup">
+    <h1>${CFG.icon} ${CFG.title}</h1>
+    <p>${CFG.sub}</p>
+    <div class="picker">${QNAMES.map((n,i)=>`<button class="btn pick${i===quizNo?' on':''}" data-nav onclick="pickQuiz(${i})"><span class="pi">${QICONS[i]}</span>المسابقة ${n}</button>`).join('')}</div>
+    <div class="names">
+      <label>الفريق الأول<input class="ia" id="inA" data-nav value="${names[0]}"></label>
+      <label>الفريق الثاني<input class="ib" id="inB" data-nav value="${names[1]}"></label>
+    </div>
+    <button class="btn primary big" data-nav id="bGo" onclick="begin()">يلا نبدأ المسابقة ${QNAMES[quizNo]}! 🚀</button>
+    <div class="tips">تحرّك بأسهم الريموت ⬅️➡️⬆️⬇️ واضغط OK · نصيحة: كل فريق فيه واحد من الصغار مع الجد أو الجدة</div>
+  </div>`;
+  $('bGo').focus();
+}
+function pickQuiz(i){
+  quizNo=i;
+  try{ history.replaceState(null,'','#quiz-'+(i+1)); }catch(e){ location.hash='quiz-'+(i+1); }
+  document.querySelectorAll('.pick').forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('bGo').textContent=`يلا نبدأ المسابقة ${QNAMES[i]}! 🚀`;
+  beep(600,.08);
+}
+function begin(){
+  names=[($('inA').value||'الفريق الأزرق').trim(),($('inB').value||'الفريق البرتقالي').trim()];
+  Q=QUIZZES[quizNo]; scores=[0,0]; idx=0;
+  $('nameA').textContent=names[0];$('nameB').textContent=names[1];
+  document.querySelector('.nA').textContent=names[0];document.querySelector('.nB').textContent=names[1];
+  $('qname').textContent='المسابقة '+QNAMES[quizNo];
+  updateScores();
+  $('hdr').hidden=false;$('controls').hidden=false;
+  beep(523,.1);setTimeout(()=>beep(659,.1),100);setTimeout(()=>beep(784,.2),200);
+  render();
+}
+
+/* ================= العرض ================= */
+function stopAll(){clearInterval(timerId);clearTimeout(seqId);timerId=seqId=null}
+function shuffleWord(w){
+  const L=[...w]; let s, tries=0;
+  do{ for(let i=L.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[L[i],L[j]]=[L[j],L[i]];} s=L.join(''); tries++; }while(s===w&&tries<20);
+  return L;
+}
+
+function render(){
+  stopAll();
+  const it=Q[idx];
+  $('prog').textContent=`${ar(idx+1)} / ${ar(Q.length)}`;
+  const lab=it.t==='gen'?LABEL['gen'+it.who]:LABEL[it.t];
+  let body='', hasAnswer=false;
+
+  if(it.t==='trick'){
+    body=`<p class="q">${it.q}</p>${it.say?'<div class="hint">(قولوها كلكم بصوت عالي!)</div>':''}${timerHTML()}${ansHTML(it.a,it.s)}`; hasAnswer=true;
+  }else if(it.t==='gen'){
+    body=`<p class="q">${it.q}</p>${timerHTML()}${ansHTML(it.a)}`; hasAnswer=true;
+  }else if(it.t==='three'){
+    body=`<p class="q">${it.q}</p><div class="hint">عندك ${CFG.times.three} ثواني بس! ⚡</div>${timerHTML()}`;
+  }else if(it.t==='anagram'){
+    const L=shuffleWord(it.w);
+    body=`<p class="q small">رتّبوا الحروف… وش الكلمة؟</p>
+          <div class="tiles">${L.map(c=>`<span>${c}</span>`).join('')}</div>${timerHTML()}${ansHTML(it.w)}`; hasAnswer=true;
+  }else if(it.t==='proverb'){
+    body=`<p class="q big">${it.q}</p><div class="hint">كمّلوا المثل بسرعة!</div>${timerHTML()}${ansHTML(it.a)}`; hasAnswer=true;
+  }else if(it.t==='odd'){
+    body=`<p class="q small">وش الكلمة اللي ما تنتمي للباقين؟</p>
+          <div class="odd">${it.items.map(x=>`<span>${x}</span>`).join('')}</div>${timerHTML()}${ansHTML(it.a,it.s)}`; hasAnswer=true;
+  }else if(it.t==='seq'){
+    const num=/^[0-9]/.test(it.items[0]);
+    body=`<p class="q small">وش اللي بعده؟</p>
+          <div class="seq" dir="${num?'ltr':'rtl'}">${it.items.map(x=>`<span>${x}</span>`).join('<i>،</i>')}<i>،</i><span class="qm">؟</span></div>${timerHTML()}${ansHTML(it.a,it.s)}`; hasAnswer=true;
+  }else if(it.t==='math'){
+    body=`<div class="hint" id="mhint">اجمعوا بعقلكم… بدون ورقة ولا أصابع! 🤫</div>
+          <div class="flash" id="flash" dir="ltr">🧮</div>${ansHTML(it.a,it.s)}`; hasAnswer=true;
+  }else if(it.t==='stroop'){
+    body=`<p class="q small">قولوا <u>لون</u> الكلمة… مو الكلمة نفسها!</p>
+          <div class="hint">مثال: <b style="color:#3b8bff">أحمر</b> ← تقول «أزرق»</div>
+          <div class="stroop" id="stroop"></div>${timerHTML()}`;
+  }else if(it.t==='noyes'){
+    body=`<p class="q">لاعب واحد من كل فريق… جاوب ${CFG.times.noyes} ثانية بدون ما تقول «لا» أو «نعم»!</p>
+          <div class="hint">المقدّم يسأل بسرعة ويحاول يطيّحه:</div>
+          <div class="helpers show">${NOYES_HELP.map(h=>`<span>${h}</span>`).join('')}</div>${timerHTML()}`;
+  }else if(it.t==='opposite'){
+    body=`<p class="q small">${it.fast?'الجولة السريعة! 🔥 ':''}الكل واقف… وسوّوا <u>عكس</u> الأمر اللي يطلع!</p>
+          <div class="hint">فوق ← تأشر تحت · يمين ← تأشر يسار · قوموا ← تقعد</div>
+          <div class="flash" id="flash">🔄</div>`;
+  }
+
+  $('stage').innerHTML=`<div class="card"><div class="badge">${lab}</div>${body}</div>`;
+  $('bReveal').hidden=!hasAnswer;
+  $('bStart').textContent='▶ ابدأ';
+  $('bPrev').hidden=idx===0;
+  $('bNext').textContent=idx===Q.length-1?'النتيجة 🏆':'التالي ←';
+  $('bStart').focus();
+}
+const timerHTML=()=>`<div class="timer" id="timer"><div class="tnum" id="tnum"></div><div class="tbar"><div class="tfill" id="tfill"></div></div></div>`;
+const ansHTML=(a,s)=>`<div class="answer" id="ans">${a}${s?`<small dir="auto">${s}</small>`:''}</div>`;
+
+/* ================= التشغيل ================= */
+const TIMES=CFG.times;
+function startActivity(){
+  stopAll();
+  const it=Q[idx];
+  $('bStart').textContent='↺ من جديد';
+  if(it.t==='stroop'){ buildStroop(); runTimer(TIMES.stroop); }
+  else if(TIMES[it.t]) runTimer(TIMES[it.t]);
+  else if(it.t==='math') runMath(it);
+  else if(it.t==='opposite') runOpposite(it.fast);
+}
+
+function runTimer(sec){
+  const t=$('timer'); if(!t) return;
+  t.classList.add('show');t.classList.remove('end');
+  const total=sec*1000, start=Date.now();
+  const tick=()=>{
+    const left=Math.max(0,total-(Date.now()-start));
+    const s=Math.ceil(left/1000);
+    if($('tnum').textContent!==ar(s)){ $('tnum').textContent=ar(s); if(s<=3&&s>0) beep(700,.08,.15); }
+    $('tfill').style.width=(left/total*100)+'%';
+    if(left<=0){ clearInterval(timerId);timerId=null; $('tnum').textContent='⏰ انتهى الوقت!'; t.classList.add('end'); buzz(); $('bReveal').hidden?$('bA').focus():$('bReveal').focus(); }
+  };
+  tick(); timerId=setInterval(tick,100);
+}
+
+function buildStroop(){
+  const box=$('stroop');box.classList.add('show');
+  const words=[];
+  for(let i=0;i<CFG.stroopN;i++){
+    let w=COLORS[Math.floor(Math.random()*COLORS.length)], c;
+    do{c=COLORS[Math.floor(Math.random()*COLORS.length)]}while(c.n===w.n);
+    words.push(`<span style="color:${c.c}">${w.n}</span>`);
+  }
+  box.innerHTML=words.join('');
+}
+
+function runMath(it){
+  const f=$('flash'), steps=it.steps;
+  let i=0; $('ans').classList.remove('show'); $('mhint').textContent='ركّزوا… 👀';
+  const show=()=>{
+    if(i<steps.length){ f.textContent=steps[i]; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); beep(500+i*40,.08,.12); i++; seqId=setTimeout(show,CFG.mathMs); }
+    else{ f.textContent='= ؟'; $('mhint').textContent='كم الناتج؟ بسرعة! 🤔'; ding(); $('bReveal').focus(); }
+  };
+  show();
+}
+
+function runOpposite(fast){
+  const C=[{w:'فوق',i:'⬆️'},{w:'تحت',i:'⬇️'},{w:'يمين',i:'➡️'},{w:'يسار',i:'⬅️'},{w:'قوموا',i:'🧍'},{w:'اقعدوا',i:'🪑'}];
+  const f=$('flash'); const O=fast?CFG.oppFast:CFG.opp; let n=0, total=O.n, delay=O.start, last=-1;
+  const show=()=>{
+    if(n>=total){ f.innerHTML='🏁<div style="font-size:.35em">مين بقى صاحي؟</div>'; ding(); $('bA').focus(); return; }
+    let k; do{k=Math.floor(Math.random()*C.length)}while(k===last); last=k;
+    f.innerHTML=`${C[k].w}<div style="font-size:.4em">${C[k].i}</div>`;
+    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); beep(600,.06,.12);
+    n++; delay=Math.max(O.min, delay-O.step); seqId=setTimeout(show,delay);
+  };
+  show();
+}
+
+function reveal(){
+  const a=$('ans'); if(!a) return;
+  stopAll(); a.classList.add('show'); ding();
+  const t=$('timer'); if(t) t.classList.remove('show');
+  $('bA').focus();
+}
+
+function addPoint(team,d){
+  scores[team]=Math.max(0,scores[team]+d); updateScores();
+  const el=$(team?'scoreB':'scoreA'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  if(d>0){ ding(); $('bNext').focus(); }
+}
+function updateScores(){ $('scoreA').textContent=scores[0]; $('scoreB').textContent=scores[1]; }
+
+function go(d){
+  const n=idx+d;
+  if(n>=Q.length) return showEnd();
+  if(n<0) return;
+  idx=n; render();
+}
+
+/* ================= النهاية ================= */
+function showEnd(){
+  stopAll(); $('controls').hidden=true;
+  let title, crown='🏆';
+  if(scores[0]===scores[1]){ title='تعادل! الكل أبطال 🤝'; crown='🤝'; }
+  else title=`الفائز: ${scores[0]>scores[1]?names[0]:names[1]} 🎉`;
+  $('prog').textContent='النهاية';
+  const nextQ=(quizNo+1)%5;
+  $('stage').innerHTML=`<div class="card setup">
+    <div class="crown">${crown}</div>
+    <h1>${title}</h1>
+    <p>${names[0]}: ${scores[0]} — ${names[1]}: ${scores[1]}</p>
+    <div class="picker">
+      <button class="btn primary" data-nav id="bNextQ" onclick="pickQuiz(${nextQ});begin()">المسابقة ${QNAMES[nextQ]} ←</button>
+      <button class="btn" data-nav onclick="showSetup()">القائمة الرئيسية 🏠</button>
+    </div>
+  </div>`;
+  $('bNextQ').focus();
+  [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.25),i*160));
+  const E=['🎉','🎊','⭐','🏆','✨','🥳'];
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div'); s.className='confetti';
+    s.textContent=E[i%E.length]; s.style.left=Math.random()*100+'vw';
+    s.style.animationDuration=(2.5+Math.random()*3)+'s'; s.style.animationDelay=(Math.random()*2)+'s';
+    document.body.appendChild(s); setTimeout(()=>s.remove(),8000);
+  }
+}
+/* زر بدء من شاشة النهاية يحتاج حقول الأسماء */
+const _begin=begin;
+begin=function(){ if(!$('inA')){ const a=names[0],b=names[1]; $('stage').insertAdjacentHTML('beforeend',`<input id="inA" hidden value="${a}"><input id="inB" hidden value="${b}">`); } _begin(); };
+
+/* ================= تحكم الريموت (الأسهم) ================= */
+function move(dir){
+  const els=[...document.querySelectorAll('[data-nav]')].filter(e=>e.offsetParent!==null&&!e.hidden);
+  const cur=document.activeElement;
+  if(!els.includes(cur)){ els[0]&&els[0].focus(); return; }
+  const r=cur.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+  let best=null, bd=1e9;
+  for(const el of els){
+    if(el===cur) continue;
+    const b=el.getBoundingClientRect(), x=b.left+b.width/2-cx, y=b.top+b.height/2-cy;
+    const ok = dir==='left'?x<-5 : dir==='right'?x>5 : dir==='up'?y<-5 : y>5;
+    if(!ok) continue;
+    const horiz=dir==='left'||dir==='right';
+    const d=(horiz?Math.abs(x):Math.abs(y))+(horiz?Math.abs(y):Math.abs(x))*2.5;
+    if(d<bd){bd=d;best=el;}
+  }
+  if(best) best.focus();
+}
+document.addEventListener('keydown',e=>{
+  const map={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',Left:'left',Right:'right',Up:'up',Down:'down'};
+  const dir=map[e.key]||({37:'left',38:'up',39:'right',40:'down'})[e.keyCode];
+  const inInput=document.activeElement&&document.activeElement.tagName==='INPUT';
+  if(dir){
+    if(inInput&&(dir==='left'||dir==='right')) return;
+    e.preventDefault(); move(dir); return;
+  }
+  if((e.key==='Enter'||e.keyCode===13)&&inInput){ e.preventDefault(); move('down'); }
+});
+window.addEventListener('hashchange',()=>{ if(!$('hdr').hidden) return; showSetup(); });
+
+showSetup();
+</script>
+</body>
+</html>
