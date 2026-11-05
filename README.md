@@ -8,3 +8,8 @@
 الرابط: https://mohammedftouhi.github.io/sahra-quiz/
 
 - قضايا التحقيق (6 قضايا): https://mohammedftouhi.github.io/sahra-quiz/cases/
+
+## 🧩 ألعاب التفكير والتحقيق
+- [غرفة الهروب — 5 غرف](https://mohammedftouhi.github.io/sahra-quiz/games/escape.html)
+- [مين الكذاب؟ — 30 جولة](https://mohammedftouhi.github.io/sahra-quiz/games/liar.html)
+- [ألغاز المنطق — 20 لغز](https://mohammedftouhi.github.io/sahra-quiz/games/logic.html)
