@@ -6,3 +6,5 @@
 - المستوى الصعب: 5 مسابقات × 50 سؤال
 
 الرابط: https://mohammedftouhi.github.io/sahra-quiz/
+
+- قضايا التحقيق (6 قضايا): https://mohammedftouhi.github.io/sahra-quiz/cases/
